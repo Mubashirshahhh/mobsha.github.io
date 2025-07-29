@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mobsha - Integrated Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Global CSS Variables */
+        :root {
+            --primary: #1A53A2;
+            --bg-gradient-global: linear-gradient(135deg, #91C4FF 0%, #D9E5F5 100%);
+            --glass-base: rgba(255, 255, 255, 0.2);
+            --blur-base: blur(16px);
+            --font-main: 'Inter', sans-serif;
+            --project-link-color: #134A90;
+            --sub-heading-color: #134A90;
+            --color-grey-14: #212224;
+            --color-grey-23-80: rgba(59, 59, 59, 0.80);
+            --nav-height: clamp(60px, 10vh, 80px); /* Define navigation height for spacing */
+        }
+
+        /* Essential for scroll events and base styling */
+        html, body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background: var(--bg-gradient-global);
+            overflow-x: hidden; /* Global horizontal overflow prevention */
+            color: #030303;
+            scroll-behavior: smooth; /* For smooth scrolling between sections */
+        }
+
+        /* --- Main Section Stacking Logic --- */
+        .section-wrapper {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh; /* Allow content to expand */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.8s cubic-bezier(0.65, 0.05, 0.36, 1), opacity 0.8s cubic-bezier(0.65, 0.05, 0.36, 1);
+            overflow: hidden; /* Important for containing content during transitions on non-active sections */
+            box-sizing: border-box;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0; /* Prevents sections from shrinking */
+        }
+
+        /* Initial states for sections */
+        .section-wrapper:not(.active) {
+            position: absolute; /* Stack non-active sections */
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none; /* Disable interaction when not active */
+            overflow-y: hidden; /* Hide content of inactive sections */
+        }
+
+        .section-wrapper.active {
+            position: relative; /* Active section takes up space in flow */
+            opacity: 1;
+            pointer-events: auto; /* Enable interaction */
+            z-index: 10; /* Ensure active section is on top */
+            overflow-y: auto; /* Allow scrolling within the active section if content exceeds viewport */
+        }
+
+        .section-wrapper.prev-section {
+            transform: translateY(-100%) scale(0.9); /* Animate upwards and shrink */
+            opacity: 0;
+            z-index: 5;
+        }
+
+        .section-wrapper.next-section {
+            transform: translateY(100%) scale(0.9); /* Animate downwards and shrink */
+            opacity: 0;
+            z-index: 5;
+        }
+
+        .section-wrapper.poof-up {
+            transform: translateY(-100vh) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Backgrounds for each section */
+        #section-intro {
+            background: linear-gradient(135deg, #71ACF8 0%, #A6CBFB 19%, #EFF6FF 100%);
+            padding-top: var(--nav-height); /* Add padding to account for fixed nav */
+        }
+        #section-about {
+            background: var(--bg-gradient-global);
+            padding-top: var(--nav-height); /* Add padding to account for fixed nav */
+        }
+        #section-bento {
+            background: linear-gradient(135deg, #91C4FF 0%, #91BCFA 100%);
+            display: block; /* Ensures content flows vertically */
+            padding-top: var(--nav-height); /* Add padding to account for fixed nav */
+        }
+        #section-benefits {
+            background: linear-gradient(135deg, #ADD1FF 0%, #A3CEFF 100%);
+            padding-top: var(--nav-height); /* Add padding to account for fixed nav */
+        }
+
+        /* --- Main Navigation (Fixed) --- */
+        .main-nav {
+            position: fixed; /* Changed to fixed */
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: clamp(10px, 3vw, 20px) clamp(20px, 6vw, 60px); /* Responsive padding */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            z-index: 1000; /* High z-index to stay on top */
+            flex-wrap: wrap; /* Allow navigation items to wrap */
+            background: transparent; /* Removed white background */
+            backdrop-filter: none; /* Removed blur effect */
+            -webkit-backdrop-filter: none; /* Removed blur effect for Safari */
+            box-shadow: none; /* Removed shadow */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.5s ease, opacity 0.5s ease; /* Smooth transition for background on scroll */
+        }
+
+        /* Optional: Add a background to the nav when scrolled down for better readability */
+        body.scrolled .main-nav {
+            background-color: rgba(255, 255, 255, 0.9); /* Subtle white background */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .logo .Mobsha {
+            color: #132035;
+            font-size: clamp(22px, 3vw, 28px); /* Responsive font size */
+            font-family: Inter;
+            font-weight: 800;
+            line-height: 1.2;
+            text-decoration: none;
+        }
+
+        .navigation-links {
+            display: flex;
+            gap: clamp(10px, 2vw, 20px); /* Responsive gap */
+            align-items: center;
+            flex-wrap: wrap; /* Allow nav items to wrap */
+            justify-content: center;
+        }
+
+        .nav-item {
+            font-size: clamp(14px, 1.5vw, 16px); /* Responsive font size */
+            font-family: Inter;
+            text-decoration: none;
+            padding: clamp(5px, 1vw, 8px) clamp(10px, 2vw, 16px); /* Responsive padding */
+            border-radius: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-item:nth-child(1) { /* Assuming this is for 'Home' or active state on first section */
+            color: var(--color-grey-14);
+            font-weight: 700;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .nav-item:not(:first-child) {
+            color: var(--color-grey-23-80);
+            font-weight: 400;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--color-grey-14);
+        }
+
+        /* --- Frame 1 (Intro) Specific Styles --- */
+        .intro-page-container {
+            width: 100vw;
+            min-height: calc(100vh - var(--nav-height)); /* Adjusted for nav height */
+            position: relative;
+            overflow: hidden; /* Keep hidden for elements outside the glass container */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: none;
+            z-index: 2;
+        }
+
+        .hero-content-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 clamp(20px, 8vw, 60px); /* Increased min padding for better fit */
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        .frame1-gradient-overlay {
+            position: absolute;
+            width: clamp(400px, 80vw, 800px);
+            height: clamp(400px, 80vw, 800px);
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .frame1-glass-container {
+            position: relative; /* Important for absolute positioning of projects-link-footer */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: var(--blur-base);
+            background-color: var(--glass-base);
+            border-radius: 32px;
+            padding: clamp(40px, 8vw, 80px) clamp(30px, 6vw, 60px); /* Scaled down padding */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            gap: clamp(24px, 5vw, 40px); /* Scaled down gap */
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .text-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(20px, 4vw, 24px);
+            transform: translateY(40px);
+            opacity: 0;
+            transition: all 1.2s ease;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .text-content-wrapper.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .heading-group {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2.5vw, 15px);
+        }
+
+        .main-heading {
+            color: #121E33;
+            font-size: clamp(32px, 6vw, 50px); /* Scaled down font size */
+            font-family: Inter;
+            font-weight: 800;
+            line-height: 1.1em;
+            margin: 0;
+            text-align: center;
+            background: linear-gradient(to right, #134A90, #71ACF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subheading-and-button {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(24px, 5vw, 48px);
+            width: 100%;
+        }
+
+        .subheading-text {
+            color: var(--sub-heading-color);
+            font-size: clamp(16px, 2.5vw, 20px); /* Scaled down font size */
+            font-family: Inter;
+            font-weight: 400;
+            line-height: 1.5em;
+            margin: 0;
+            text-align: center;
+            max-width: 100%;
+        }
+
+        .action-button {
+            width: clamp(160px, 25vw, 180px); /* Scaled down width */
+            height: clamp(44px, 7vw, 56px); /* Scaled down height */
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 40px;
+            flex-shrink: 0;
+        }
+
+        .button-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(191deg, #00BFFF 0%, #87CEFA 100%);
+            border-radius: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .action-button span {
+            color: #080E17;
+            font-size: clamp(14px, 2vw, 16px); /* Scaled down font size */
+            font-family: Inter;
+            font-weight: 400;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .action-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 191, 255, 0.4);
+        }
+
+        .projects-link-footer {
+            /* Positioned absolutely within .frame1-glass-container */
+            position: absolute;
+            bottom: clamp(20px, 5vw, 40px); /* Responsive bottom offset */
+            right: clamp(20px, 5vw, 40px); /* Responsive right offset */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .projects-link-footer a {
+            color: var(--project-link-color);
+            font-size: clamp(14px, 2vw, 18px); /* Scaled down font size */
+            font-family: Inter;
+            font-weight: 400;
+            line-height: 1.5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .projects-link-footer a:hover {
+            color: #00BFFF;
+            text-decoration: underline;
+        }
+
+        .projects-link-footer svg {
+            vertical-align: middle;
+            transition: transform 0.3s ease;
+            width: clamp(12px, 2vw, 16px);
+            height: clamp(15px, 2.5vw, 19px);
+        }
+
+        .projects-link-footer:hover svg {
+            transform: translateX(5px);
+        }
+
+        /* --- Frame 2 (About Me) Specific Styles --- */
+        .frame2-section {
+            width: 100vw;
+            min-height: calc(100vh - var(--nav-height)); /* Adjusted for nav height */
+            padding: clamp(30px, 6vw, 60px) clamp(24px, 4vw, 48px);
+            gap: clamp(24px, 5vw, 48px);
+            position: relative;
+            z-index: 1;
+            transition: transform 1s ease-out, opacity 1s ease-out;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .frame2-glass-container {
+            display: flex;
+            flex-direction: row;
+            backdrop-filter: var(--blur-base);
+            background-color: var(--glass-base);
+            border-radius: 32px;
+            padding: clamp(24px, 5vw, 50px) clamp(20px, 4vw, 40px); /* Scaled down padding */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            gap: clamp(20px, 4vw, 40px); /* Scaled down gap */
+            width: 100%;
+            max-width: 1440px;
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .frame2-profile {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(-80px) scale(0.96);
+            opacity: 0;
+            transition: all 1.2s ease;
+        }
+
+        .frame2-profile img {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 8px 8px 200px 8px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .frame2-profile img:hover {
+            transform: scale(1.03);
+        }
+
+        .frame2-text {
+            flex: 1.3;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(16px, 3vw, 24px);
+            transform: translateX(80px) scale(0.96);
+            opacity: 0;
+            transition: all 1.2s ease;
+        }
+
+        .frame2-text h1 {
+            font-size: clamp(30px, 5vw, 48px); /* Scaled down font size */
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+            text-align: center;
+        }
+
+        .frame2-text p {
+            font-size: clamp(15px, 2vw, 18px); /* Scaled down font size */
+            line-height: 1.8;
+            color: #2e2e2e;
+            max-width: 640px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .frame2-in-view {
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+
+        .frame2-gradient-overlay {
+            content: '';
+            position: absolute;
+            width: clamp(400px, 80vw, 800px);
+            height: clamp(400px, 80vw, 800px);
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            z-index: 0;
+        }
+
+        /* --- Frame 3 (Bento Boxes) Specific Styles --- */
+        .frame3-container {
+            max-width: 100vw;
+            margin: 0 auto;
+            padding: 0;
+            position: relative;
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        .bento-heading-section {
+            text-align: center;
+            padding-top: clamp(40px, 8vw, 80px); /* Adjust padding for spacing from nav */
+            margin-bottom: 5vh; /* Space between heading and bento stack */
+        }
+
+        .bento-main-heading {
+            color: #121E33;
+            font-size: clamp(32px, 6vw, 50px);
+            font-family: Inter;
+            font-weight: 800;
+            line-height: 1.1em;
+            margin: 0 auto; /* Center the heading */
+            max-width: 900px; /* Optional: constrain width */
+            background: linear-gradient(to right, #134A90, #71ACF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .frame3-hero-section {
+            /* This was previously used for the heading area, now reduced/removed as heading has its own container */
+            height: 0;
+            display: none; /* Hide if no content is needed, or keep for spacing with reduced height */
+        }
+
+        .bento-stack {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1200px;
+            padding-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .bento-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(95vw, 1100px);
+            max-width: 1100px;
+            height: clamp(300px, 65vh, 650px); /* Scaled down height */
+            border-radius: 32px;
+            margin: 0 auto;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.5s cubic-bezier(0.76, 0, 0.24, 1), z-index 0s 0.5s;
+            box-sizing: border-box;
+        }
+        .bento-box.active {
+            position: absolute;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .bento-box.animating-out-up {
+            z-index: 11;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -150vh) scale(0.8);
+        }
+        .bento-box.animating-out-down {
+            z-index: 11;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, 50vh) scale(0.8);
+        }
+        .bento-box.animating-in-up {
+            z-index: 12;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -150vh) scale(0.8);
+            animation: bento-in-up 0.5s forwards cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .bento-box.animating-in-down {
+            z-index: 12;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, 50vh) scale(0.8);
+            animation: bento-in-down 0.5s forwards cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        @keyframes bento-in-up {
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes bento-in-down {
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+        .bento-box:focus-visible {
+            box-shadow: 0 0 0 3px var(--primary, #1A53A2), 0 8px 32px rgba(0,0,0,0.18);
+        }
+        .bento-box .click-strip {
+            cursor: pointer;
+        }
+        .bento-box .tilted-arrow {
+            cursor: pointer;
+        }
+        .bento-box .box-label {
+            pointer-events: none;
+        }
+        .bento-box img {
+            border-radius: inherit;
+            object-fit: cover;
+        }
+        .bento-box .box-label,
+        .bento-box .click-strip,
+        .bento-box .tilted-arrow {
+            user-select: none;
+        }
+
+        .bento-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .bento-box:hover::before {
+            transform: translateX(100%);
+        }
+
+        .bento-box.active:hover {
+            transform: translate(-50%, calc(-50% - 12px)) scale(1.02);
+            box-shadow:
+                0 48px 96px rgba(0, 0, 0, 0.3),
+                0 24px 48px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .box-content {
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: clamp(8px, 2vw, 16px);
+            position: relative;
+            z-index: 2;
+            padding: clamp(8px, 2vw, 16px);
+        }
+
+        .main-section {
+            background: linear-gradient(145deg, var(--primary-color, #91FF8B), var(--secondary-color, #7BE16E));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .side-section {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: clamp(6px, 1.5vw, 12px);
+        }
+
+        .side-item {
+            background: linear-gradient(145deg, var(--accent-color, #B8FFB3), var(--accent-secondary, #A3F59E));
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .box-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+            border-radius: inherit;
+        }
+
+        .bento-box.active:hover .box-image {
+            transform: scale(1.08);
+        }
+
+        .box-label {
+            position: absolute;
+            top: clamp(10px, 3vw, 24px);
+            left: clamp(10px, 3vw, 24px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: clamp(6px, 1.5vw, 12px) clamp(10px, 2.5vw, 20px); /* Scaled down padding */
+            border-radius: 24px;
+            font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            z-index: 3;
+            opacity: 0;
+            transform: translateY(-16px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .bento-box.active:hover .box-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .click-strip {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(10px, 2vw, 12px) clamp(16px, 4vw, 32px); /* Let padding and content define height */
+            z-index: 4;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+        }
+
+        .bento-box.active:hover .click-strip {
+            transform: translateY(0);
+        }
+
+        .strip-text {
+            color: white;
+            font-size: clamp(0.8rem, 1.8vw, 1.1rem); /* Scaled down font size */
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .tilted-arrow {
+            width: clamp(30px, 6vw, 48px);
+            height: clamp(30px, 6vw, 48px);
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(25deg);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .tilted-arrow:hover {
+            transform: rotate(25deg) scale(1.1);
+            box-shadow: 0 6px 24px rgba(255, 255, 255, 0.4);
+        }
+
+        .arrow-icon {
+            width: clamp(16px, 3vw, 24px);
+            height: clamp(16px, 3vw, 24px);
+            stroke: black;
+            stroke-width: 2.5;
+            transform: rotate(-25deg);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: rotate(25deg) scale(1); }
+            50% { transform: rotate(25deg) scale(1.05); }
+        }
+
+        .bento-box.active:hover .tilted-arrow {
+            animation: pulse 1s infinite;
+        }
+
+        .box-vocalis { --primary-color: #C8FFC3; --secondary-color: #A8E5A3; --accent-color: #E8FFE5; --accent-secondary: #D0F5CD; }
+        .box-bonzo { --primary-color: #91FF8B; --secondary-color: #7BE16E; --accent-color: #B8FFB3; --accent-secondary: #A3F59E; }
+        .box-fliki { --primary-color: #FFB1F5; --secondary-color: #E890D8; --accent-color: #FFD1F9; --accent-secondary: #F5C1ED; }
+        .box-watch { --primary-color: #AEAAAA; --secondary-color: #9B9696; --accent-color: #C8C4C4; --accent-secondary: #B8B3B3; }
+
+        .progress-indicator {
+            position: fixed;
+            top: 50%;
+            right: clamp(10px, 3vw, 32px);
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+            padding: 16px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.2);
+        }
+
+        .progress-dot.active {
+            background: white;
+            transform: scale(1.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        /* Box transition animations */
+        .bento-box.slide-out-up {
+            transform: translate(-50%, -150vh) scale(0.8);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .bento-box.slide-out-down {
+            transform: translate(-50%, 50vh) scale(0.8);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .bento-box.slide-in-up {
+            transform: translate(-50%, -150vh) scale(0.8);
+            opacity: 0;
+        }
+
+        .bento-box.slide-in-down {
+            transform: translate(-50%, 50vh) scale(0.8);
+            opacity: 0;
+        }
+
+        .bento-box.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            z-index: 10;
+        }
+
+        /* Spacer sections for scroll control - reduced height */
+        .spacer {
+            height: 15vh;
+        }
+
+        /* --- Frame 4 (Benefits) Specific Styles --- */
+        .frame4-body-padding {
+            position: relative;
+            width: 100%;
+            min-height: calc(100vh - var(--nav-height));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(20px, 6vw, 60px) clamp(10px, 4vw, 20px);
+            box-sizing: border-box;
+        }
+
+        .frame4-bg-decoration {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .frame4-bg-decoration-1 {
+            top: 25%;
+            left: 25%;
+            width: clamp(100px, 20vw, 256px);
+            height: clamp(100px, 20vw, 256px);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .frame4-bg-decoration-2 {
+            bottom: 25%;
+            right: 25%;
+            width: clamp(150px, 30vw, 384px);
+            height: clamp(150px, 30vw, 384px);
+            background: rgba(0, 191, 255, 0.1);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: pulse 4s ease-in-out infinite 1s;
+        }
+
+        .frame4-bg-decoration-3 {
+            top: 75%;
+            left: 50%;
+            width: clamp(80px, 15vw, 192px);
+            height: clamp(80px, 15vw, 192px);
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: pulse 4s ease-in-out infinite 2s;
+        }
+
+        .frame4-container {
+            max-width: 1252px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            padding: clamp(16px, 4vw, 40px);
+            box-sizing: border-box;
+        }
+
+        .benefits-section {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(24px, 6vw, 60px); /* Scaled down gap */
+        }
+
+        .heading-section {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 3vw, 24px);
+            text-align: center;
+        }
+
+        .main-heading-frame4 {
+            color: #002F70;
+            font-size: clamp(26px, 4.5vw, 44px); /* Scaled down font size */
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: clamp(10px, 3vw, 30px);
+            width: 100%;
+        }
+
+        .benefit-card {
+            margin: 0;
+            padding: clamp(18px, 4vw, 28px); /* Scaled down padding */
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1 / 1; /* Make the card a square */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            opacity: 0;
+            transition: transform 0.3s ease;
+            border-radius: 24px;
+        }
+
+        .benefit-card:hover::before {
+            opacity: 1;
+            transform: translateX(100%);
+        }
+
+        .benefit-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0, 191, 255, 0.5), rgba(59, 130, 246, 0.5), rgba(147, 51, 234, 0.5));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            border-radius: 24px;
+            z-index: -1;
+        }
+
+        .benefit-card:hover::after {
+            opacity: 1;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .icon-heading {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2vw, 20px);
+            justify-content: center;
+            margin-bottom: clamp(10px, 3vw, 24px);
+        }
+
+        .icon-container {
+            width: clamp(35px, 7vw, 48px);
+            height: clamp(35px, 7vw, 48px);
+            background: linear-gradient(135deg, #00BFFF 0%, #3B82F6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+        }
+
+        .benefit-card:hover .icon-container {
+            transform: scale(1.1) rotate(6deg);
+            box-shadow: 0 8px 24px rgba(0, 191, 255, 0.5);
+        }
+
+        .icon-container svg {
+            width: clamp(20px, 4vw, 28px);
+            height: clamp(20px, 4vw, 28px);
+            fill: #121E33;
+        }
+
+        .benefit-title {
+            color: #212224;
+            font-size: clamp(16px, 2.5vw, 22px); /* Scaled down font size */
+            font-weight: 800;
+            line-height: 1.2;
+            transition: color 0.3s ease;
+        }
+
+        .benefit-card:hover .benefit-title {
+            color: #002F70;
+        }
+
+        .benefit-description {
+            color: rgba(59, 59, 59, 0.8);
+            font-size: clamp(14px, 2vw, 16px); /* Scaled down font size */
+            font-weight: 400;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+
+        .benefit-card:hover .benefit-description {
+            color: rgba(59, 59, 59, 0.9);
+        }
+
+        /* Ensure hover effects only apply to the active bento box */
+        .bento-box:not(.active):hover {
+            transform: none !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+        }
+        .bento-box:not(.active):hover::before,
+        .bento-box:not(.active):hover .box-label,
+        .bento-box:not(.active):hover .box-image,
+        .bento-box:not(.active):hover .click-strip,
+        .bento-box:not(.active):hover .tilted-arrow {
+            animation: none !important;
+            transform: none !important;
+            opacity: 0 !important;
+        }
+
+        /* --- CONTACT OVERLAY STYLES (NEW) --- */
+        .contact-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(113deg, rgba(113,172,248,0.95) 0%, rgba(217,229,245,0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000; /* Higher than anything else */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow-y: auto; /* Allow scrolling within the overlay if content is tall */
+            padding: 20px; /* Add some padding around the content */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        .contact-overlay.is-active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .contact-overlay .container {
+            max-height: 90vh; /* Constrain height for better fit on screen */
+            overflow-y: auto; /* Allow scrolling inside the form container */
+            transform: translateY(20px); /* Initial state for animation */
+            opacity: 0; /* Initial state for animation */
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .contact-overlay.is-active .container {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .contact-overlay-close-btn {
+            position: fixed;
+            top: clamp(20px, 4vw, 30px);
+            right: clamp(20px, 4vw, 30px);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 50%;
+            width: clamp(40px, 8vw, 50px);
+            height: clamp(40px, 8vw, 50px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2001;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-overlay-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .contact-overlay-close-btn svg {
+            width: clamp(24px, 5vw, 30px);
+            height: clamp(24px, 5vw, 30px);
+            stroke-width: 2;
+            color: #1a53a2;
+        }
+
+        /* Nav Minimization Styles */
+        .main-nav.minimized {
+            transform: translateY(-100%); /* Move nav off-screen */
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .main-nav.restored {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        /* Ensure body doesn't scroll when overlay is active */
+        body.contact-overlay-active {
+            overflow: hidden;
+        }
+
+        /* Styles from the provided contact.html file */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 8px 32px rgba(31, 38, 135, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Add subtle glass reflection */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .contact-header {
+            text-align: center;
+            padding: 60px 40px 40px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+            position: relative;
+        }
+
+        .contact-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #0a1b3d 0%, #1e3a8a 30%, #3b82f6 70%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .contact-header p {
+            font-size: 18px;
+            color: #64748b;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 60px;
+            padding: 40px;
+        }
+
+        /* Enhanced Glass Contact Form */
+        .contact-form {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow:
+                0 15px 50px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+                0 8px 32px rgba(113, 172, 248, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glass shimmer effect */
+        .contact-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            50% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Glass highlight on top edge */
+        .contact-form::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.6),
+                transparent
+            );
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: rgba(30, 41, 59, 0.9);
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced Glass Input Fields */
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #1e293b;
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .form-input::placeholder {
+            color: rgba(100, 116, 139, 0.7);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow:
+                0 0 0 3px rgba(59, 130, 246, 0.12),
+                0 6px 25px rgba(59, 130, 246, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+            transform: translateY(-2px);
+        }
+
+        .phone-input {
+            display: flex;
+            gap: 0;
+        }
+
+        .country-code {
+            background: rgba(241, 245, 249, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-right: none;
+            border-radius: 16px 0 0 16px;
+            padding: 16px 12px;
+            font-size: 16px;
+            color: rgba(100, 116, 139, 0.9);
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .phone-input .form-input {
+            border-radius: 0 16px 16px 0;
+            border-left: none;
+        }
+
+        .phone-input .form-input:focus {
+            border-left: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .services-section {
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .services-section h3 {
+            font-weight: 600;
+            color: rgba(30, 41, 59, 0.9);
+            margin-bottom: 16px;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        /* Enhanced Glass Service Checkboxes */
+        .service-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(248, 250, 252, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .service-checkbox::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+        }
+
+        .service-checkbox:hover {
+            background: rgba(241, 245, 249, 0.15);
+            border-color: rgba(203, 213, 225, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .service-checkbox input {
+            margin-right: 10px;
+            accent-color: #3b82f6;
+        }
+
+        .service-checkbox.checked {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.25);
+            color: #1e3a8a;
+            box-shadow:
+                0 4px 20px rgba(59, 130, 246, 0.15),
+                0 0 0 1px rgba(59, 130, 246, 0.1) inset;
+        }
+
+        .service-checkbox span {
+            color: rgba(30, 41, 59, 0.85);
+            font-weight: 500;
+        }
+
+        .service-checkbox.checked span {
+            color: rgba(30, 58, 138, 0.9);
+        }
+
+        /* Enhanced Submit Button */
+        .submit-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px 32px;
+            background: linear-gradient(9deg, rgba(0,191,255,1) 0%, rgba(173,209,255,0.82) 100%);
+            color: #002f70;
+            border: none;
+            border-radius: 80px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0,191,255,0.3);
+            z-index: 1;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,191,255,0.4);
+            background: linear-gradient(9deg, rgba(0,191,255,0.9) 0%, rgba(173,209,255,0.9) 100%);
+        }
+
+        .submit-button:active {
+            transform: translateY(-1px) scale(1.01);
+        }
+
+        /* Contact Info Sidebar */
+        .contact-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .contact-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 32px rgba(31, 38, 135, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 12px 48px rgba(31, 38, 135, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .contact-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-card p {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: rgba(59, 130, 246, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            text-decoration: none;
+            color: #1e3a8a;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .contact-action:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+        }
+
+        .contact-action svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .social-link {
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .social-link:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(59, 130, 246, 0.35);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Floating Elements with Glass Effect */
+        .floating-element {
+            position: absolute;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            right: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            left: 5%;
+            animation-delay: 3s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(15px) rotate(240deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .contact-overlay .container {
+                padding: 10px; /* Reduce container padding for very small screens */
+            }
+
+            .contact-header {
+                padding: 40px 20px 20px;
+            }
+
+            .contact-content {
+                padding: 20px;
+                gap: 30px;
+            }
+
+            .contact-form {
+                padding: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* --- RESPONSIVE FIXES FOR MOBILE AND SMALL SCREENS (add at end of your <style>) --- */
+        @media (max-width: 700px) {
+            .section-wrapper,
+            .frame1-glass-container,
+            .frame2-glass-container,
+            .bento-box {
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow-y: auto !important;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            .bento-box {
+                min-height: 220px;
+                height: clamp(220px, 60vw, 360px) !important;
+                width: 99vw !important;
+                font-size: 13px;
+            }
+            .box-content {
+                grid-template-columns: 1fr !important;
+                grid-template-rows: 2fr 1fr !important;
+                gap: 6px !important;
+            }
+            .side-section {
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: 1fr !important;
+            }
+            .main-heading, .main-heading-frame4, .bento-main-heading { /* Added .bento-main-heading here */
+                font-size: clamp(1.3rem, 5vw, 2rem) !important;
+            }
+            .subheading-text {
+                font-size: 1rem !important;
+            }
+            .frame2-profile img { max-width: 140px !important; }
+            /* Footer styles moved to overlay, no longer needed directly in main HTML responsive */
+            /* .footer-content-frame5 { grid-template-columns: 1fr !important; gap: 10px !important; } */
+            /* .footer-column h3, .footer-link, .policy-link, .copyright {
+                font-size: 13px !important;
+            } */
+        }
+        @media (max-width: 480px) {
+            .main-nav { flex-direction: column !important; gap: 6px !important; padding: 5px 4vw !important; }
+            .hero-content-area, .frame1-glass-container { padding-left: 2vw !important; padding-right: 2vw !important; }
+            .project-card img { height: 120px !important; }
+            .bento-box { height: 170px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-scroll-container">
+        <header class="main-nav">
+            <div class="logo">
+                <span class="Mobsha">Mobsha</span>
+            </div>
+            <nav class="navigation-links">
+                <a href="#section-intro" class="nav-item js-scroll-trigger">Home</a>
+                <a href="#section-bento" class="nav-item js-scroll-trigger">Projects</a>
+                <a href="#section-about" class="nav-item js-scroll-trigger">About</a>
+                <a href="#section-contact" class="nav-item js-scroll-trigger">Contact</a>
+            </nav>
+        </header>
+
+        <section id="section-intro" class="section-wrapper active">
+            <div class="intro-page-container">
+                <main class="hero-content-area">
+                    <div class="frame1-gradient-overlay"></div>
+                    <div class="frame1-glass-container">
+                        <div class="text-content-wrapper" id="text-content-wrapper">
+                            <div class="heading-group">
+                                <p class="main-heading">I Make High-quality<br/> Sites for Startup <br/>and Agencies.</p>
+                            </div>
+                            <div class="subheading-and-button">
+                                <p class="subheading-text">As a certified developer and experienced UI/UX designer, I create custom, high-quality websites that stand out and are fun to use.</p>
+                                <button class="action-button">
+                                    <div class="button-inner">
+                                        <span>Let's talk</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <footer class="projects-link-footer">
+                            <a href="#section-bento" class="js-scroll-trigger">View my projects</a> <svg width="16" height="19" viewBox="0 0 16 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.9947 1.3971C14.9379 0.847748 14.4465 0.448479 13.8971 0.505308L4.94487 1.4314C4.39552 1.48823 3.99625 1.97964 4.05308 2.52899C4.10991 3.07835 4.60132 3.47761 5.15067 3.42078L13.1082 2.59759L13.9314 10.5551C13.9882 11.1045 14.4796 11.5037 15.029 11.4469C15.5783 11.3901 15.9776 10.8987 15.9208 10.3493L14.9947 1.3971ZM1 17.5L1.77611 18.1306L14.7761 2.13059L14 1.5L13.2239 0.869408L0.223886 16.8694L1 17.5Z" fill="var(--project-link-color)"/>
+                            </svg>
+                        </footer>
+                    </div>
+                </main>
+            </div>
+        </section>
+
+        <section id="section-about" class="section-wrapper">
+            <div class="frame2-section">
+                <div class="frame2-gradient-overlay"></div>
+                <div class="frame2-glass-container">
+                    <div class="frame2-profile" id="frame2-profile">
+                        <img src="images/mobsha.png" alt="Mobsha Picture" />
+                    </div>
+                    <div class="frame2-text" id="frame2-text">
+                        <h1>Hey, I'm Mobsha.</h1>
+                        <p>I'm a UI/UX designer with over 2 years of experience in web development. In 2019, I started with WordPress through a **side project** that now generates over **3M+ page views annually**.</p>
+                        <p>Since 2021, I've been building clean, modern, and high-performing websites—fully responsive, interactive, and user-friendly.</p>
+                        <p>My expertise ranges from animated one-pagers to large multilingual platforms, complex CMSs, custom code, and seamless integrations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-bento" class="section-wrapper">
+            <div class="frame3-container">
+                <div class="bento-heading-section">
+                    <h2 class="bento-main-heading">My Work</h2>
+                </div>
+                <div class="frame3-hero-section"></div>
+
+                <div class="progress-indicator">
+                    <div class="progress-dot active" data-index="0"></div>
+                    <div class="progress-dot" data-index="1"></div>
+                    <div class="progress-dot" data-index="2"></div>
+                    <div class="progress-dot" data-index="3"></div>
+                    <div class="progress-dot" data-index="4"></div>
+                </div>
+
+                <div class="bento-stack">
+                    <div class="bento-box box-vocalis active" data-index="0" tabindex="0" aria-label="Vocalis project preview">
+                        <div class="box-label">Vocalis</div>
+                        <div class="box-content">
+                            <div class="main-section">
+                                <img class="box-image" src="images/vocalisai.png" alt="Vocalis Main" loading="lazy">
+                            </div>
+                            <div class="side-section">
+                                <div class="side-item">
+                                    <img class="box-image" src="images/vocalisai2.png" alt="Vocalis 2" loading="lazy">
+                                </div>
+                                <div class="side-item">
+                                    <img class="box-image" src="images/vocalisai3.png" alt="Vocalis 3" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="click-strip" role="button" tabindex="0" aria-label="View Vocalis project">
+                            <div class="strip-text">View Project</div>
+                            <div class="tilted-arrow">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bento-box box-bonzo" data-index="1">
+                        <div class="box-label">Bonzo</div>
+                        <div class="box-content">
+                            <div class="main-section">
+                                <img class="box-image" src="images/bonzo.png" alt="Bonzo Main" loading="lazy">
+                            </div>
+                            <div class="side-section">
+                                <div class="side-item">
+                                    <img class="box-image" src="images/bonzo2.png" alt="Bonzo 2" loading="lazy">
+                                </div>
+                                <div class="side-item">
+                                    <img class="box-image" src="images/bonzo3.png" alt="Bonzo 3" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="click-strip">
+                            <div class="strip-text">View Project</div>
+                            <div class="tilted-arrow">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bento-box box-fliki" data-index="2">
+                        <div class="box-label">Fliki</div>
+                        <div class="box-content">
+                            <div class="main-section">
+                                <img class="box-image" src="images/fliki.png" alt="Fliki Main" loading="lazy">
+                            </div>
+                            <div class="side-section">
+                                <div class="side-item">
+                                    <img class="box-image" src="images/fliki2.png" alt="Fliki 2" loading="lazy">
+                                </div>
+                                <div class="side-item">
+                                    <img class="box-image" src="images/fliki3.png" alt="Fliki 3" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="click-strip">
+                            <div class="strip-text">View Project</div>
+                            <div class="tilted-arrow">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bento-box box-watch" data-index="3">
+                        <div class="box-label">Watch</div>
+                        <div class="box-content">
+                            <div class="main-section">
+                                <img class="box-image" src="images/watch.png" alt="Watch Main" loading="lazy">
+                            </div>
+                            <div class="side-section">
+                                <div class="side-item">
+                                    <img class="box-image" src="images/watch2.png" alt="Watch 2" loading="lazy">
+                                </div>
+                                <div class="side-item">
+                                    <img class="box-image" src="images/watch3.png" alt="Watch 3" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="click-strip">
+                            <div class="strip-text">View Project</div>
+                            <div class="tilted-arrow">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bento-box box-bonzo" data-index="4" style="--primary-color: #FF8B91; --secondary-color: #E16E7B; --accent-color: #FFB3B8; --accent-secondary: #F5C1ED;">
+                        <div class="box-label">Extra</div>
+                        <div class="box-content">
+                            <div class="main-section">
+                                <img class="box-image" src="https://picsum.photos/800/600?random=13" alt="Extra Main" loading="lazy">
+                            </div>
+                            <div class="side-section">
+                                <div class="side-item">
+                                    <img class="box-image" src="https://picsum.photos/400/300?random=14" alt="Extra 1" loading="lazy">
+                                </div>
+                                <div class="side-item">
+                                    <img class="box-image" src="https://picsum.photos/400/300?random=15" alt="Extra 2" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="click-strip">
+                            <div class="strip-text">View Project</div>
+                            <div class="tilted-arrow">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+            </div>
+        </section>
+
+        <section id="section-benefits" class="section-wrapper">
+            <div class="frame4-body-padding">
+                <div class="frame4-bg-decoration frame4-bg-decoration-1"></div>
+                <div class="frame4-bg-decoration frame4-bg-decoration-2"></div>
+                <div class="frame4-bg-decoration frame4-bg-decoration-3"></div>
+
+                <div class="frame4-container">
+                    <div class="benefits-section">
+                        <div class="heading-section">
+                            <h2 class="main-heading-frame4">Your reliable Webflow Designer<br/>and Developer</h2>
+                        </div>
+
+                        <div class="benefits-grid">
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M13.9998 4.95866C7.73679 4.95866 3.20817 9.01834 3.20817 13.4169C3.20817 15.6824 4.36076 17.8079 6.36862 19.386L7.05945 19.9289L6.31191 24.0404L10.6389 21.4676L11.1963 21.5854C12.0885 21.7741 13.0281 21.8753 13.9998 21.8753C20.2629 21.8753 24.7915 17.8156 24.7915 13.4169C24.7915 9.01834 20.2629 4.95866 13.9998 4.95866ZM0.291504 13.4169C0.291504 6.86199 6.73191 2.04199 13.9998 2.04199C21.2678 2.04199 27.7082 6.86199 27.7082 13.4169C27.7082 19.9719 21.2678 24.7919 13.9998 24.7919C13.0289 24.7919 12.08 24.7084 11.1635 24.5489L5.35898 28.0003H2.62744L3.88181 21.1013C1.69221 19.1158 0.291504 16.431 0.291504 13.4169Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Clear communication</h3>
+                                    </div>
+                                    <p class="benefit-description">100% transparency on budget, timing, services, and challenges. Simple, direct, and honest communication builds trust and is my foundation for successful projects.</p>
+                                </div>
+                            </div>
+
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M2.625 2.625H25.375L25.3752 25.3749H2.625V2.625ZM5.54167 10.2083V5.54167H22.4583V10.2083H5.54167ZM5.54167 13.125V22.4583H10.2083V13.125H5.54167ZM22.4585 13.125H13.1252V22.4583H22.4585V13.125Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Design-first development</h3>
+                                    </div>
+                                    <p class="benefit-description">For me, excellent design is essential for a great user experience. As a developer, I work closely with design and marketing teams to bring your vision to life exactly as intended.</p>
+                                </div>
+                            </div>
+
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M14 2.46045L28 9.29766V11.7025L22.0937 14.587V20.2057L19.3229 21.5589V15.9402L14 18.5397L6.70817 14.9786V18.3126C6.70817 18.6988 7.0514 19.4291 8.47225 20.1496C9.81163 20.8288 11.7638 21.2916 13.9998 21.2916C14.7415 21.2916 15.4563 21.2406 16.131 21.1461L17.5753 20.944L17.9796 23.8325L16.5353 24.0347C15.7243 24.1482 14.8743 24.2083 13.9998 24.2083C11.4034 24.2083 8.98055 23.6777 7.15306 22.7509C5.40703 21.8654 3.7915 20.377 3.7915 18.3126V13.5541L0 11.7025V9.29766L14 2.46045ZM21.0033 11.8735L16.2211 9.54077L13.063 11.0831L17.8452 13.4159L14 15.2938L4.1843 10.5001L14 5.70636L23.8157 10.5001L21.0033 11.8735Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Your reliable expert</h3>
+                                    </div>
+                                    <p class="benefit-description">In addition to design, I have over 20 years of experience with various web technologies and scripting languages like JavaScript, allowing me to reliably tackle any technical challenge.</p>
+                                </div>
+                            </div>
+
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 29" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M15.8957 14.3356V5.2959L10.5601 7.29675L11.4818 9.75462L13.2707 9.08377V14.3356H15.8957Z"/>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M4.0835 10.1066C4.0835 4.62978 8.52334 0.189941 14.0002 0.189941C19.477 0.189941 23.9168 4.62978 23.9168 10.1066C23.9168 13.305 22.4026 16.1498 20.0519 17.9632V28.1171H17.6392L13.9998 25.5176L10.3605 28.1171H7.94775V17.9627C5.59744 16.1493 4.0835 13.3047 4.0835 10.1066ZM14.0002 3.10661C10.1342 3.10661 7.00016 6.24061 7.00016 10.1066C7.00016 13.9726 10.1342 17.1066 14.0002 17.1066C17.8662 17.1066 21.0002 13.9726 21.0002 10.1066C21.0002 6.24061 17.8662 3.10661 14.0002 3.10661ZM14.0002 20.0232C15.15 20.0232 16.2541 19.8275 17.2811 19.4676V24.4563L13.9998 22.1125L10.7186 24.4563V19.4674C11.7457 19.8275 12.8501 20.0232 14.0002 20.0232Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Highest quality</h3>
+                                    </div>
+                                    <p class="benefit-description">Webflow generates clean and fast code. Additionally, I always prioritize performance and accessibility in every website to ensure the highest quality standards.</p>
+                                </div>
+                            </div>
+
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 29" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M14 3.98161C8.36209 3.98161 3.79167 8.55203 3.79167 14.1899C3.79167 19.8278 8.36209 24.3982 14 24.3982C19.6379 24.3982 24.2083 19.8278 24.2083 14.1899C24.2083 8.55203 19.6379 3.98161 14 3.98161ZM0.875 14.1899C0.875 6.9412 6.75126 1.06494 14 1.06494C21.2487 1.06494 27.125 6.9412 27.125 14.1899C27.125 21.4386 21.2487 27.3149 14 27.3149C6.75126 27.3149 0.875 21.4386 0.875 14.1899Z"/>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M21.3124 10.9819L12.25 20.0443L6.97925 14.7735L9.04165 12.7111L12.25 15.9195L19.25 8.91943L21.3124 10.9819Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Worry-free execution</h3>
+                                    </div>
+                                    <p class="benefit-description">No need to worry about technical hurdles. With a comprehensive tool stack, years of experience, and a proactive approach, I always find great solutions that delight.</p>
+                                </div>
+                            </div>
+
+                            <div class="benefit-card">
+                                <div class="card-content">
+                                    <div class="icon-heading">
+                                        <div class="icon-container">
+                                            <svg viewBox="0 0 28 29" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5415 7.77327C5.5415 5.03486 7.76143 2.81494 10.4998 2.81494C13.2382 2.81494 15.4582 5.03486 15.4582 7.77327C15.4582 10.5116 13.2382 12.7316 10.4998 12.7316C7.76143 12.7316 5.5415 10.5116 5.5415 7.77327ZM10.4998 5.73161C9.37226 5.73161 8.45817 6.64569 8.45817 7.77327C8.45817 8.90086 9.37226 9.81494 10.4998 9.81494C11.6274 9.81494 12.5415 8.90086 12.5415 7.77327C12.5415 6.64569 11.6274 5.73161 10.4998 5.73161Z"/>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.81775 14.6542C7.87543 14.1565 9.02995 13.8984 10.1989 13.8984H10.8008C11.9697 13.8984 13.1242 14.1565 14.1819 14.6542L14.2273 14.6755C15.1419 15.106 15.9627 15.7125 16.6427 16.4605C17.153 17.0219 17.5774 17.6556 17.9022 18.3412L18.028 18.6067C18.6405 19.8997 18.9582 21.3126 18.9582 22.7434V25.5651H2.0415V22.7434C2.0415 21.3126 2.35922 19.8997 2.97172 18.6067L3.09748 18.3412C3.42223 17.6556 3.84664 17.0219 4.35694 16.4605C5.03693 15.7125 5.85775 15.106 6.77241 14.6755L6.81775 14.6542ZM10.1989 16.8151C9.45931 16.8151 8.72885 16.9783 8.05966 17.2933L8.01433 17.3146C7.44662 17.5818 6.93715 17.9582 6.5151 18.4225C6.19837 18.7709 5.93494 19.1642 5.73338 19.5898L5.60762 19.8553C5.19356 20.7294 4.97245 21.682 4.95884 22.6484H16.0408C16.0272 21.682 15.8061 20.7294 15.3921 19.8553L15.2663 19.5898C15.0647 19.1642 14.8013 18.7709 14.4846 18.4225C14.0625 17.9582 13.5531 17.5818 12.9853 17.3146L12.94 17.2933C12.2708 16.9783 11.5404 16.8151 10.8008 16.8151H10.1989Z"/>
+                                                <path d="M21.5833 25.5646V22.648H23.0396C23.015 21.7886 22.8123 20.943 22.4435 20.165L22.3234 19.9116C22.1432 19.5315 21.9084 19.1799 21.6263 18.8679C21.364 18.5777 21.0639 18.3252 20.7347 18.1169C20.5878 17.7544 20.4221 17.3988 20.2383 17.0515L20.1896 16.9595C19.7684 16.164 19.2489 15.4245 18.6434 14.7584L18.6189 14.7314C18.5422 14.6471 18.4643 14.5641 18.385 14.4824C19.4296 14.5001 20.4595 14.7356 21.4087 15.1743L21.4617 15.1988C22.3453 15.6072 23.1372 16.1899 23.79 16.912C24.263 17.4352 24.6568 18.0249 24.959 18.6623L25.079 18.9157C25.6583 20.1378 25.9589 21.4733 25.9589 22.8258V25.5646H21.5833Z"/>
+                                                <path d="M17.938 13.6064C17.7508 13.6064 17.5661 13.5957 17.3844 13.5749C17.012 13.2783 16.6198 13.0069 16.2104 12.7629C16.7566 12.1385 17.2019 11.4236 17.5211 10.6437C17.6552 10.6739 17.7948 10.6897 17.938 10.6897C18.9851 10.6897 19.8339 9.84099 19.8339 8.79395C19.8339 7.77897 19.0362 6.95027 18.0336 6.90049C17.9161 5.87505 17.5941 4.91179 17.1094 4.05253C17.3786 4.00581 17.6555 3.98145 17.938 3.98145C20.5959 3.98145 22.7505 6.13608 22.7505 8.79395C22.7505 11.4518 20.5959 13.6064 17.938 13.6064Z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="benefit-title">Ongoing cooperation</h3>
+                                    </div>
+                                    <p class="benefit-description">Even after completion, I remain available as a technical partner for fast support. Depending on your needs, I can also help continuously develop the website further.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="contact-overlay" class="contact-overlay">
+        <div class="contact-overlay-close-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+
+        <div class="container">
+            <div class="contact-header">
+                <h1>Contact our team</h1>
+                <p>Got any questions about the product or scaling on our platform? We're here to help.<br>
+                Chat to our friendly team 24/7 and get onboard in less than 5 minutes.</p>
+            </div>
+
+            <div class="contact-content">
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First name</label>
+                                <input type="text" id="firstName" name="firstName" class="form-input" placeholder="First name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last name</label>
+                                <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Last name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="you@company.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone number</label>
+                            <div class="phone-input">
+                                <div class="country-code">US</div>
+                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1 (555) 000-0000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" class="form-input form-textarea" placeholder="Leave us a message..." required></textarea>
+                        </div>
+
+                        <div class="services-section">
+                            <h3>Services</h3>
+                            <div class="services-grid">
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="website-design">
+                                    <span>Website design</span>
+                                </label>
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="content-creation">
+                                    <span>Content creation</span>
+                                </label>
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="ux-design">
+                                    <span>UX design</span>
+                                </label>
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="strategy-consulting">
+                                    <span>Strategy & consulting</span>
+                                </label>
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="user-research">
+                                    <span>User research</span>
+                                </label>
+                                <label class="service-checkbox">
+                                    <input type="checkbox" name="services" value="other">
+                                    <span>Other</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-button">
+                            Send message
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="contact-sidebar">
+                    <div class="contact-card">
+                        <h3>Chat with us</h3>
+                        <p>Speak to our friendly team via live chat.</p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <a href="#" class="contact-action">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                Start a live chat
+                            </a>
+                            <a href="mailto:hello@mobsha.com" class="contact-action">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Shoot us an email
+                            </a>
+                            <div class="social-links">
+                                <a href="#" class="social-link">
+                                    <svg fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://www.linkedin.com/in/pascal-strasche/" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://www.malt.de/profile/pascalstrasche" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://read.cv/pascalstrasche" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://dribbble.com/pascalstrasche" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm7.568 5.302c1.4 1.5 2.252 3.5 2.273 5.684-.653-.126-1.542-.259-2.684-.259-.524 0-1.085.037-1.687.11-.104-.26-.218-.52-.34-.773l-.018-.043c1.854-.759 3.094-1.617 3.456-4.719zm-4.719 1.754c.067.146.132.293.195.442l.014.033c-2.325.936-4.908 1.051-6.726 1.051-.394 0-.74-.007-1.043-.018C7.912 6.085 9.794 4.245 12 4.245c1.756 0 3.35.68 4.568 1.811-.203.17-.422.344-.65.53-.203.17-.422.344-.65.53-.426-.17-.9-.307-1.419-.374-.524-.067-1.085-.037-1.687.11zm-7.238 2.213c.33.007.696.011 1.098.011 1.777 0 4.158-.104 6.299-.9.126.245.244.493.354.744-2.798 1.175-4.716 3.802-5.284 6.693C2.481 17.018 1.12 14.69 1.12 12c0-1.19.193-2.347.546-3.425l.018-.043c.524-.067 1.085-.037 1.687.11zm1.419 9.707c.524-.067 1.085-.037 1.687.11 2.325.936 4.908 1.051 6.726 1.051.394 0 .74-.007 1.043-.018.637 2.48 2.519 4.32 4.725 4.32 1.756 0 3.35-.68 4.568-1.811-.203-.17-.422-.344-.65-.53-.203.17-.422.344-.65-.53-.426.17-.9.307-1.419.374z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://medium.com/@pascalstrasche" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </a>
+                                <a href="https://www.producthunt.com/@pascal_strasche" class="social-link" target="_blank" rel="noopener">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-card">
+                        <h3>Call us</h3>
+                        <p>Call our team Mon-Fri from 8am to 5pm.</p>
+                        <a href="tel:+15550000000" class="contact-action">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            +1 (555) 000-0000
+                        </a>
+                    </div>
+
+                    <div class="contact-card">
+                        <h3>Visit us</h3>
+                        <p>Chat to us in person at our Melbourne HQ.</p>
+                        <a href="#" class="contact-action">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            100 Smith Street, Melbourne VIC 3000
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Main page scrolling and section management
+        class MainPageScroller {
+            constructor() {
+                this.sections = document.querySelectorAll('.section-wrapper');
+                this.currentSectionIndex = 0;
+                this.isAnimating = false;
+                this.scrollSensitivity = 50; // Pixels to scroll to trigger a section change
+                this.scrollTimeout = null; // To debounce scroll events
+                this.bentoSystem = null; // Reference to HybridBentoBoxes instance
+                this.mainNav = document.querySelector('.main-nav'); // Get the navigation element
+                this.contactOverlay = document.getElementById('contact-overlay'); // Get the contact overlay
+                this.closeContactBtn = this.contactOverlay.querySelector('.contact-overlay-close-btn');
+
+                this.init();
+            }
+
+            init() {
+                this.updateSectionVisibility();
+                window.addEventListener('wheel', this.handleWheelScroll.bind(this), { passive: false });
+                window.addEventListener('keydown', this.handleKeydown.bind(this));
+
+                // Add event listeners for all scroll-trigger links
+                document.querySelectorAll('.js-scroll-trigger').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = e.currentTarget.getAttribute('href');
+                        if (targetId === '#section-contact') {
+                            // Open contact overlay instead of scrolling to a section
+                            this.openContactOverlay();
+                        } else if (targetId && targetId.startsWith('#')) {
+                            const targetSection = document.querySelector(targetId);
+                            if (targetSection) {
+                                const newIndex = Array.from(this.sections).indexOf(targetSection);
+                                if (newIndex !== -1) {
+                                    // Calculate direction based on current and target index
+                                    const direction = newIndex > this.currentSectionIndex ? 'down' : 'up';
+                                    this.goToSection(newIndex, direction);
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // Add event listener for the action button in the intro section
+                document.querySelector('#section-intro .action-button').addEventListener('click', () => {
+                    this.openContactOverlay();
+                });
+
+                // Add event listener for the "View my projects" link in the intro section
+                document.querySelector('#section-intro .projects-link-footer a').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    if (targetSection) {
+                        const newIndex = Array.from(this.sections).indexOf(targetSection);
+                        if (newIndex !== -1) {
+                            this.goToSection(newIndex, 'down'); // Assuming "View my projects" always goes down
+                        }
+                    }
+                });
+
+                // Add event listeners for the contact overlay close button
+                this.closeContactBtn.addEventListener('click', this.closeContactOverlay.bind(this));
+                // Also close on escape key when overlay is open
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.contactOverlay.classList.contains('is-active')) {
+                        this.closeContactOverlay();
+                    }
+                });
+
+
+                // Add scroll event listener for fixed nav background
+                window.addEventListener('scroll', this.handleScrollBackground.bind(this));
+
+                // Initialize contact form specific interactions within the overlay
+                this.setupContactFormInteractions();
+            }
+
+            handleScrollBackground() {
+                // Only apply scrolled class if contact overlay is NOT active
+                if (!this.contactOverlay.classList.contains('is-active')) {
+                    if (window.scrollY > 50) { // Adjust scroll threshold as needed
+                        document.body.classList.add('scrolled');
+                    } else {
+                        document.body.classList.remove('scrolled');
+                    }
+                }
+            }
+
+
+            handleWheelScroll(event) {
+                // If contact overlay is active, prevent main page scroll
+                if (this.contactOverlay.classList.contains('is-active')) {
+                    event.preventDefault();
+                    return;
+                }
+
+                // Special handling for bento box
+                if (this.currentSectionIndex === 2 && this.bentoSystem) {
+                    const scrolledInsideBento = this.bentoSystem.handleInternalScroll(event.deltaY);
+                    if (scrolledInsideBento) {
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                if (this.isAnimating) {
+                    event.preventDefault();
+                    return;
+                }
+
+                const activeSection = this.sections[this.currentSectionIndex];
+                const scrollDelta = event.deltaY;
+                const isScrollable = activeSection.scrollHeight > activeSection.clientHeight;
+                const isAtTop = activeSection.scrollTop === 0;
+                // Use a small tolerance for the bottom check
+                const isAtBottom = activeSection.scrollTop + activeSection.clientHeight >= activeSection.scrollHeight - 1;
+
+                // Scrolling down
+                if (scrollDelta > 0) {
+                    if (isScrollable && !isAtBottom) {
+                        // Allow native scroll within the section
+                        return;
+                    }
+                    // If at the bottom or not scrollable, try to go to the next section
+                    if (this.currentSectionIndex < this.sections.length - 1) {
+                        event.preventDefault();
+                        this.goToSection(this.currentSectionIndex + 1, 'down');
+                    }
+                }
+                // Scrolling up
+                else if (scrollDelta < 0) {
+                    if (isScrollable && !isAtTop) {
+                        // Allow native scroll within the section
+                        return;
+                    }
+                    // If at the top or not scrollable, try to go to the previous section
+                    if (this.currentSectionIndex > 0) {
+                        event.preventDefault();
+                        this.goToSection(this.currentSectionIndex - 1, 'up');
+                    }
+                }
+            }
+
+            handleKeydown(event) {
+                // If contact overlay is active, allow its internal scroll or close on Escape
+                if (this.contactOverlay.classList.contains('is-active')) {
+                    // No default scroll behavior for main page when overlay is open
+                    if (event.key === 'Escape') {
+                        this.closeContactOverlay();
+                        event.preventDefault(); // Prevent further actions for Escape key
+                    }
+                    // You might want to add specific keydown handling for the form inputs here if needed
+                    return;
+                }
+
+                // Special handling for bento box
+                if (this.currentSectionIndex === 2 && this.bentoSystem) {
+                    const handledByKey = this.bentoSystem.handleInternalKeydown(event.key);
+                    if (handledByKey) {
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                if (this.isAnimating) {
+                    event.preventDefault();
+                    return;
+                }
+
+                const activeSection = this.sections[this.currentSectionIndex];
+                const isScrollable = activeSection.scrollHeight > activeSection.clientHeight;
+                const isAtTop = activeSection.scrollTop === 0;
+                const isAtBottom = activeSection.scrollTop + activeSection.clientHeight >= activeSection.scrollHeight - 1;
+
+                if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+                    if (isScrollable && !isAtBottom) {
+                        return; // Allow native keydown scroll
+                    }
+                    if (this.currentSectionIndex < this.sections.length - 1) {
+                        event.preventDefault();
+                        this.goToSection(this.currentSectionIndex + 1, 'down');
+                    }
+                } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+                    if (isScrollable && !isAtTop) {
+                        return; // Allow native keydown scroll
+                    }
+                    if (this.currentSectionIndex > 0) {
+                        event.preventDefault();
+                        this.goToSection(this.currentSectionIndex - 1, 'up');
+                    }
+                }
+            }
+
+            goToSection(newIndex, direction) {
+                if (this.isAnimating || newIndex === this.currentSectionIndex) {
+                    return;
+                }
+
+                this.isAnimating = true;
+
+                const currentActiveSection = this.sections[this.currentSectionIndex];
+                const newActiveSection = this.sections[newIndex];
+
+                // Animate current section out
+                currentActiveSection.classList.remove('active');
+                if (direction === 'down') {
+                    currentActiveSection.classList.add('poof-up'); // Use poof-up for exiting upwards
+                } else {
+                    currentActiveSection.classList.add('next-section'); // Animate downwards for previous
+                }
+
+                // Prepare new section for animation in
+                newActiveSection.classList.remove('prev-section', 'next-section', 'poof-up'); // Clean slate
+                newActiveSection.style.zIndex = '10'; // Bring to front immediately for transition
+                newActiveSection.style.opacity = '1'; // Ensure it's visible during transition
+
+                // Timeout to allow CSS classes to apply before adding 'active'
+                setTimeout(() => {
+                    newActiveSection.classList.add('active'); // Start the transition in
+                    this.currentSectionIndex = newIndex;
+
+                    // Clean up classes after animation
+                    setTimeout(() => {
+                        currentActiveSection.classList.remove('poof-up', 'next-section', 'prev-section');
+                        currentActiveSection.style.zIndex = ''; // Reset z-index
+                        currentActiveSection.style.opacity = '0'; // Hide
+                        currentActiveSection.style.transform = ''; // Reset transform
+
+                        // Update all section visibilities
+                        this.updateSectionVisibility();
+                        this.isAnimating = false;
+
+                        // Re-initialize specific scripts for the new active section if needed
+                        this.initializeSectionSpecificScripts(this.currentSectionIndex);
+
+                        // Scroll to the top of the newly active section (important for fixed nav)
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    }, 800); // Matches CSS transition duration
+                }, 50); // Small delay to ensure classes are registered before transition begins
+            }
+
+            updateSectionVisibility() {
+                this.sections.forEach((section, index) => {
+                    if (index === this.currentSectionIndex) {
+                        section.classList.add('active');
+                        section.classList.remove('prev-section', 'next-section', 'poof-up');
+                        section.style.zIndex = '10';
+                        section.style.opacity = '1';
+                        section.style.transform = 'translateY(0) scale(1)';
+                    } else if (index < this.currentSectionIndex) {
+                        section.classList.remove('active', 'next-section');
+                        section.classList.add('prev-section');
+                        section.style.zIndex = '5';
+                        section.style.opacity = '0';
+                        section.style.transform = 'translateY(-100%) scale(0.9)';
+                    } else { // index > this.currentSectionIndex
+                        section.classList.remove('active', 'prev-section');
+                        section.classList.add('next-section');
+                        section.style.zIndex = '5';
+                        section.style.opacity = '0';
+                        section.style.transform = 'translateY(100%) scale(0.9)';
+                    }
+                });
+            }
+
+            initializeSectionSpecificScripts(index) {
+                // De-initialize bento system if not on its section
+                if (index !== 2 && this.bentoSystem) {
+                    this.bentoSystem = null; // Remove reference, allow garbage collection
+                }
+
+                // Initialize specific scripts when their section becomes active
+                if (index === 0) { // Frame 1
+                    this.triggerFrame1Animations();
+                } else if (index === 1) { // Frame 2
+                    this.triggerFrame2Animations();
+                } else if (index === 2 && !this.bentoSystem) { // Frame 3 - Only initialize once
+                    this.bentoSystem = new HybridBentoBoxes();
+                } else if (index === 3) { // Frame 4
+                    this.triggerFrame4Animations();
+                }
+                // No specific initialization for contact overlay here, it's handled by open/close methods
+            }
+
+            // New methods for Contact Overlay
+            openContactOverlay() {
+                this.isAnimating = true; // Prevent main scroll during overlay animation
+                this.contactOverlay.classList.add('is-active');
+                document.body.classList.add('contact-overlay-active'); // Prevent body scroll
+                this.mainNav.classList.add('minimized');
+                this.mainNav.classList.remove('restored'); // Ensure restored is removed
+                // Add a class to the container itself to trigger its fade-in animation
+                this.contactOverlay.querySelector('.container').style.opacity = '1';
+                this.contactOverlay.querySelector('.container').style.transform = 'translateY(0)';
+
+
+                // Disable interactions on main sections
+                this.sections.forEach(section => {
+                    section.style.pointerEvents = 'none';
+                });
+
+                setTimeout(() => {
+                    this.isAnimating = false;
+                }, 500); // Match CSS transition duration
+            }
+
+            closeContactOverlay() {
+                this.isAnimating = true; // Prevent main scroll during overlay animation
+                this.contactOverlay.classList.remove('is-active');
+                document.body.classList.remove('contact-overlay-active'); // Re-enable body scroll
+                this.mainNav.classList.remove('minimized');
+                this.mainNav.classList.add('restored'); // Ensure restored is added for smooth transition back
+
+                // Add a class to the container itself to trigger its fade-out animation
+                this.contactOverlay.querySelector('.container').style.opacity = '0';
+                this.contactOverlay.querySelector('.container').style.transform = 'translateY(20px)';
+
+
+                // Re-enable interactions on main sections
+                this.sections.forEach(section => {
+                    section.style.pointerEvents = 'auto';
+                });
+
+                setTimeout(() => {
+                    this.isAnimating = false;
+                    // Ensure nav is fully restored after animation
+                    this.mainNav.classList.remove('restored');
+                     // Reset the 'scrolled' class if applicable
+                     this.handleScrollBackground();
+                }, 500); // Match CSS transition duration
+            }
+
+            // Frame 1 specific animations
+            triggerFrame1Animations() {
+                const textContentWrapper = document.getElementById('text-content-wrapper');
+                if (textContentWrapper) {
+                    textContentWrapper.classList.remove('in-view'); // Reset
+                    void textContentWrapper.offsetWidth; // Trigger reflow
+                    textContentWrapper.classList.add('in-view');
+                }
+            }
+
+            // Frame 2 specific animations
+            triggerFrame2Animations() {
+                const profile = document.getElementById('frame2-profile');
+                const text = document.getElementById('frame2-text');
+                if (profile && text) {
+                    profile.classList.remove('frame2-in-view'); // Reset
+                    text.classList.remove('frame2-in-view'); // Reset
+                    void profile.offsetWidth; // Trigger reflow for both
+                    void text.offsetWidth;
+                    profile.classList.add('frame2-in-view');
+                    text.classList.add('frame2-in-view');
+                }
+            }
+
+            // Frame 4 specific animations
+            triggerFrame4Animations() {
+                const cards = document.querySelectorAll('#section-benefits .benefit-card');
+                cards.forEach(card => {
+                    // Re-add event listeners if they were removed/lost (optional, if needed)
+                    // Or simply ensure the hover effects work as CSS implies
+                });
+            }
+
+            // Contact form specific interactions (from your second HTML snippet)
+            setupContactFormInteractions() {
+                // Ensure the form's submit and checkbox logic works within the overlay
+                const contactForm = this.contactOverlay.querySelector('#contactForm');
+                if (contactForm) {
+                    contactForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+
+                        // Get form data
+                        const formData = new FormData(this);
+                        const services = [];
+                        formData.getAll('services').forEach(service => services.push(service));
+
+                        // Simulate form submission
+                        const submitButton = contactForm.querySelector('.submit-button');
+                        const originalText = submitButton.innerHTML;
+
+                        submitButton.innerHTML = 'Sending...';
+                        submitButton.style.transform = 'scale(0.98)';
+
+                        setTimeout(() => {
+                            submitButton.innerHTML = '✓ Message sent!';
+                            submitButton.style.background = 'linear-gradient(9deg, #10b981 0%, #34d399 100%)';
+
+                            setTimeout(() => {
+                                submitButton.innerHTML = originalText;
+                                submitButton.style.background = '';
+                                submitButton.style.transform = '';
+                                contactForm.reset(); // Use contactForm.reset() directly
+
+                                // Reset checkbox styling
+                                contactForm.querySelectorAll('.service-checkbox').forEach(checkbox => {
+                                    checkbox.classList.remove('checked');
+                                });
+                            }, 2000);
+                        }, 1500);
+                    });
+                }
+
+                // Handle service checkbox styling
+                this.contactOverlay.querySelectorAll('.service-checkbox input').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const label = this.closest('.service-checkbox');
+                        if (this.checked) {
+                            label.classList.add('checked');
+                        } else {
+                            label.classList.remove('checked');
+                        }
+                    });
+                });
+
+                // Add click handler to checkbox labels
+                this.contactOverlay.querySelectorAll('.service-checkbox').forEach(label => {
+                    label.addEventListener('click', function(e) {
+                        if (e.target.tagName !== 'INPUT') {
+                            const checkbox = this.querySelector('input');
+                            checkbox.checked = !checkbox.checked;
+                            checkbox.dispatchEvent(new Event('change'));
+                        }
+                    });
+                });
+            }
+        }
+
+        /* --- HybridBentoBoxes (from frame3.html) - Modified to work within the main scroller --- */
+        // (Keep this class as it was, it's already integrated to be managed by MainPageScroller)
+        class HybridBentoBoxes {
+            constructor() {
+                this.boxes = document.querySelectorAll('#section-bento .bento-box');
+                this.progressDots = document.querySelectorAll('#section-bento .progress-dot');
+                this.currentIndex = 0;
+                this.isAnimating = false;
+                this.scrollThreshold = 50; // Pixels to scroll to trigger a bento box change
+                this.scrollAccumulator = 0; // Accumulate scroll delta
+
+                this.init();
+            }
+
+            init() {
+                this.setupProgressIndicator();
+                this.setupBoxInteractions();
+                this.updateStackPositions(); // Initial update
+            }
+
+            handleInternalScroll(deltaY) {
+                if (this.isAnimating) {
+                    return true; // Indicate that scroll was consumed
+                }
+
+                this.scrollAccumulator += deltaY;
+
+                if (this.scrollAccumulator > this.scrollThreshold && this.currentIndex < this.boxes.length - 1) {
+                    this.goToBox(this.currentIndex + 1, 'down');
+                    this.scrollAccumulator = 0; // Reset accumulator
+                    return true;
+                } else if (this.scrollAccumulator < -this.scrollThreshold && this.currentIndex > 0) {
+                    this.goToBox(this.currentIndex - 1, 'up');
+                    this.scrollAccumulator = 0; // Reset accumulator
+                    return true;
+                }
+                return false; // Indicate scroll was not fully consumed by bento system
+            }
+
+            handleInternalKeydown(key) {
+                if (this.isAnimating) {
+                    return true;
+                }
+                if (key === 'ArrowDown' || key === 'PageDown') {
+                    if (this.currentIndex < this.boxes.length - 1) {
+                        this.goToBox(this.currentIndex + 1, 'down');
+                        return true;
+                    }
+                } else if (key === 'ArrowUp' || key === 'PageUp') {
+                    if (this.currentIndex > 0) {
+                        this.goToBox(this.currentIndex - 1, 'up');
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            goToBox(newIndex, direction) {
+                if (this.isAnimating || newIndex === this.currentIndex) return;
+
+                this.isAnimating = true;
+
+                const currentBox = this.boxes[this.currentIndex];
+                const targetBox = this.boxes[newIndex];
+
+                currentBox.classList.remove('active');
+                if (direction === 'down') {
+                    currentBox.classList.add('slide-out-up');
+                } else {
+                    currentBox.classList.add('slide-out-down');
+                }
+
+                this.boxes.forEach((box, index) => {
+                    if (index !== newIndex && index !== this.currentIndex) {
+                        box.style.display = 'none';
+                        box.classList.remove('active');
+                    }
+                });
+
+                targetBox.style.display = 'block';
+                targetBox.style.zIndex = '10'; // Bring to front
+                targetBox.style.opacity = '1'; // Ensure visible
+
+                if (direction === 'down') {
+                    targetBox.classList.add('slide-in-down'); // Animate from bottom
+                } else {
+                    targetBox.classList.add('slide-in-up'); // Animate from top
+                }
+
+                setTimeout(() => {
+                    targetBox.classList.remove('slide-in-up', 'slide-in-down');
+                    targetBox.classList.add('active');
+                    targetBox.style.transform = 'translate(-50%, -50%) scale(1)'; // Ensure centered after animation
+                    targetBox.style.opacity = '1';
+
+                    setTimeout(() => {
+                        currentBox.style.display = 'none';
+                        currentBox.classList.remove('slide-out-up', 'slide-out-down');
+                        currentBox.style.zIndex = '1'; // Reset z-index after animation
+
+                        this.currentIndex = newIndex;
+                        this.updateProgressIndicator();
+                        this.updateStackPositions(); // Re-apply stack positions relative to new current box
+                        this.isAnimating = false;
+                    }, 500); // Matches CSS transition duration
+                }, 50); // Small delay to ensure classes are registered before transition begins
+
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(40);
+                }
+            }
+
+
+            updateStackPositions() {
+                this.boxes.forEach((box, index) => {
+                    if (index === this.currentIndex) {
+                        box.classList.add('active');
+                        box.style.opacity = '1';
+                        box.style.pointerEvents = 'auto';
+                        box.style.zIndex = '10';
+                        box.style.position = 'absolute';
+                        box.style.transform = 'translate(-50%, -50%) scale(1)'; // Ensure active box is centered
+                    } else {
+                        box.classList.remove('active', 'animating-out-up', 'animating-out-down', 'animating-in-up', 'animating-in-down');
+                        box.style.opacity = '0';
+                        box.style.pointerEvents = 'none';
+                        box.style.zIndex = '1';
+                        box.style.position = 'absolute';
+                        box.style.transform = 'translate(-50%, -50%) scale(1)'; // Reset transform for non-active boxes
+                    }
+                });
+            }
+
+            updateProgressIndicator() {
+                this.progressDots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === this.currentIndex);
+                });
+            }
+
+            setupProgressIndicator() {
+                this.progressDots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        this.goToBox(index, index > this.currentIndex ? 'down' : 'up');
+
+                        dot.style.transform = 'scale(1.8)';
+                        setTimeout(() => {
+                            dot.style.transform = index === this.currentIndex ? 'scale(1.5)' : 'scale(1)';
+                        }, 150);
+                    });
+
+                    dot.addEventListener('mouseenter', () => {
+                        if (index !== this.currentIndex) {
+                            dot.style.transform = 'scale(1.3)';
+                        }
+                    });
+
+                    dot.addEventListener('mouseleave', () => {
+                        if (index !== this.currentIndex) {
+                            dot.style.transform = 'scale(1)';
+                        }
+                    });
+                });
+            }
+
+            setupBoxInteractions() {
+                this.boxes.forEach((box, index) => {
+                    box.addEventListener('mouseenter', () => {
+                        if (index === this.currentIndex) {
+                            // Apply hover transform on top box only
+                            box.style.transform = 'translate(-50%, calc(-50% - 12px)) scale(1.02)';
+                            box.style.zIndex = '20';
+                        }
+                    });
+                    box.addEventListener('mouseleave', () => {
+                        if (index === this.currentIndex) {
+                            // Restore original transform for top box
+                            box.style.transform = 'translate(-50%, -50%) scale(1)';
+                            box.style.zIndex = '10';
+                        }
+                    });
+                    box.addEventListener('click', () => {
+                        // This click is on the box itself, not necessarily for navigation
+                        // The existing logic for visual click feedback is fine
+                        if (index === this.currentIndex) { // Only apply click animation to active box
+                            box.style.transform += ' scale(0.98)';
+                            setTimeout(() => {
+                                box.style.transform = 'translate(-50%, -50%) scale(1)'; // Reset to normal active state
+                            }, 150);
+                        }
+                        console.log(`Clicked on box ${index}: ${box.querySelector('.box-label').textContent}`);
+                    });
+
+                    const arrow = box.querySelector('.tilted-arrow');
+                    if (arrow) { // Check if arrow exists before adding event listener
+                        arrow.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent box click event from firing
+                            console.log(`Arrow clicked for ${box.querySelector('.box-label').textContent}`);
+                            arrow.style.transform = 'rotate(25deg) scale(0.9)';
+                            setTimeout(() => {
+                                arrow.style.transform = 'rotate(25deg) scale(1)';
+                            }, 150);
+                        });
+                    }
+                });
+            }
+        }
+
+        /* --- Frame 5 copy email function --- */
+        function copyEmail() {
+            navigator.clipboard.writeText('hello@mobsha.com').then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'Email copied!';
+                button.style.color = '#00bfff';
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy email: ', err);
+                alert('Failed to copy email. Please copy it manually: hello@mobsha.com');
+            });
+        }
+
+
+        /* Initialize the main page scroller when DOM is loaded */
+        document.addEventListener('DOMContentLoaded', () => {
+            window.mainScroller = new MainPageScroller();
+            // Initially trigger animations for the first section
+            window.mainScroller.initializeSectionSpecificScripts(0);
+        });
+    </script>
+</body>
+</html>
